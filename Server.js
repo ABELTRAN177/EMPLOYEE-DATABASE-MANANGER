@@ -1,23 +1,25 @@
 const express = require('express');
 const inquirer = require('inquirer');
-const { Client } = require('pg');
+const { Pool } = require('pg');
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
-app.use(express.static("public"));
+// app.use(express.static("public"));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
 
-const client = new Client({
-    user: 'postgres',
+
+// connects to the database
+const pool = new Pool({
+    user: 'postgress',
     host: 'localhost',
     database: 'postgres',
-    password: 'sendit',
-    port: 5432, //??
+    password: 'password',
 });
 
-client.connect();
+
+// client.connect();
 
 
 const mainMenu = async () => {
@@ -36,6 +38,7 @@ const mainMenu = async () => {
                 "update an employee role",
                 "quit"
             ],
+            loop: false,
         },
     ]);
 
@@ -59,17 +62,17 @@ const mainMenu = async () => {
     }
 }
 const viewEmployees = async () => {
-    const res = await client.query("SELECT * FROM EMPLOYEE");
+    const res = await pool.query("SELECT * FROM employee");
     console.table(res.rows);
     mainMenu();
 }
 const viewRoles = async () => {
-    const res = await client.query("SELECT * FROM ROLE");
+    const res = await pool.query("SELECT * FROM ROLE");
     console.table(res.rows);
     mainMenu();
 }
 const viewDepartments = async () => {
-    const res = await client.query("SELECT * FROM DEPARTMENT");
+    const res = await pool.query("SELECT * FROM DEPARTMENT");
     console.table(res.rows);
     mainMenu();
 }
@@ -113,7 +116,7 @@ const addEmployee = async () => {
         },
     ]);
 
-    await client.query("INSERT INTO EMPLOYEE (employeeId, firstName, lastName, jobTitle, department, salary, managerId) VALUES ($1, $2, $3, $4, $5, $6, $7)", [answer.employeeId, answer.firstName, answer.lastName, answer.jobTitle, answer.department, answer.salary, answer.managerId]);
+    await pool.query("INSERT INTO EMPLOYEE (employeeId, firstName, lastName, jobTitle, department, salary, managerId) VALUES ($1, $2, $3, $4, $5, $6, $7)", [answer.employeeId, answer.firstName, answer.lastName, answer.jobTitle, answer.department, answer.salary, answer.managerId]);
     console.log("Employee added!");
     mainMenu();
 }
@@ -137,7 +140,7 @@ const addRole = async () => {
         },
     ]);
 
-    await client.query("INSERT INTO ROLE (title, salary, departmentId) VALUES ($1, $2, $3)", [answer.title, answer.salary, answer.departmentId]);
+    await pool.query("INSERT INTO ROLE (title, salary, departmentId) VALUES ($1, $2, $3)", [answer.title, answer.salary, answer.departmentId]);
     console.log("Role added!");
     mainMenu();
 }
@@ -148,7 +151,7 @@ const addDepartment = async () => {
         name: "name",
         message: "What is the name of the department?",
     });
-    await client.query("INSERT INTO DEPARTMENT (name) VALUES ($1)", [answer.name]);
+    await pool.query("INSERT INTO DEPARTMENT (name) VALUES ($1)", [answer.name]);
     console.log("Department added!");
     mainMenu();
 }
@@ -167,7 +170,7 @@ const updateEmployeeRole = async () => {
         },
     ]);
 
-    await client.query("UPDATE EMPLOYEE SET roleId = $1 WHERE employeeId = $2", [answer.roleId, answer.employeeId]);
+    await pool.query("UPDATE EMPLOYEE SET roleId = $1 WHERE employeeId = $2", [answer.roleId, answer.employeeId]);
     console.log("Employee role updated!");
     mainMenu();
 }
