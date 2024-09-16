@@ -12,10 +12,11 @@ app.use(express.urlencoded({ extended: false }));
 
 // connects to the database
 const pool = new Pool({
-    user: 'postgress',
+    user: 'postgres',
     host: 'localhost',
-    database: 'postgres',
+    database: process.env.DB_DATABASE,
     password: 'password',
+    port: 5432,
 });
 
 
@@ -58,11 +59,11 @@ const mainMenu = async () => {
         case "update an employee role":
             return updateEmployeeRole();
         case "quit":
-            return client.end();
+            return pool.end();
     }
 }
 const viewEmployees = async () => {
-    const res = await pool.query("SELECT * FROM employee");
+    const res = await pool.query("SELECT * FROM EMPLOYEE");
     console.table(res.rows);
     mainMenu();
 }
@@ -81,42 +82,27 @@ const addEmployee = async () => {
     const answer = await inquirer.prompt([
         {
             type: "input",
-            name: "employeeId",
-            message: "What is the employee's ID?",
-        },
-        {
-            type: "input",
-            name: "firstName",
+            name: "first_name",
             message: "What is the employee's first name?",
         },
         {
             type: "input",
-            name: "lastName",
+            name: "last_name",
             message: "What is the employee's last name?",
         },
         {
             type: "input",
-            name: "jobTitle",
-            message: "What is the employee's title?",
+            name: "role_id",
+            message: "What is the employee's role ID?",
         },
         {
             type: "input",
-            name: "department",
-            message: "what department does the employee belong to?",
-        },
-        {
-            type: "input",
-            name: "salary",
-            message: "What is the employee's salary?",
-        },
-        {
-            type: "input",
-            name: "managerId",
+            name: "manager_id",
             message: "What is the employee's manager ID?",
         },
     ]);
 
-    await pool.query("INSERT INTO EMPLOYEE (employeeId, firstName, lastName, jobTitle, department, salary, managerId) VALUES ($1, $2, $3, $4, $5, $6, $7)", [answer.employeeId, answer.firstName, answer.lastName, answer.jobTitle, answer.department, answer.salary, answer.managerId]);
+    await pool.query("INSERT INTO EMPLOYEE ( first_name, last_name, role_id, manager_id) VALUES ($1, $2, $3, $4)", [ answer.first_name, answer.last_name, answer.role_id, answer.manager_id]);
     console.log("Employee added!");
     mainMenu();
 }
@@ -135,12 +121,12 @@ const addRole = async () => {
         },
         {
             type: "input",
-            name: "departmentId",
+            name: "department_id",
             message: "What is the department ID?",
         },
     ]);
 
-    await pool.query("INSERT INTO ROLE (title, salary, departmentId) VALUES ($1, $2, $3)", [answer.title, answer.salary, answer.departmentId]);
+    await pool.query("INSERT INTO ROLE (title, salary, department_id) VALUES ($1, $2, $3)", [answer.title, answer.salary, answer.department_id]);
     console.log("Role added!");
     mainMenu();
 }
@@ -148,10 +134,10 @@ const addRole = async () => {
 const addDepartment = async () => {
     const answer = await inquirer.prompt({
         type: "input",
-        name: "name",
+        name: "department_name",
         message: "What is the name of the department?",
     });
-    await pool.query("INSERT INTO DEPARTMENT (name) VALUES ($1)", [answer.name]);
+    await pool.query("INSERT INTO DEPARTMENT (department_name) VALUES ($1)", [answer.department_name]);
     console.log("Department added!");
     mainMenu();
 }
@@ -160,17 +146,17 @@ const updateEmployeeRole = async () => {
     const answer = await inquirer.prompt([
         {
             type: "input",
-            name: "employeeId",
-            message: "What is the employee's ID?",
+            name: "employee_id",
+            message: "What is the ID of the employee you want to update?",
         },
         {
             type: "input",
-            name: "roleId",
+            name: "new_role_id",
             message: "What is the new role ID?",
         },
     ]);
 
-    await pool.query("UPDATE EMPLOYEE SET roleId = $1 WHERE employeeId = $2", [answer.roleId, answer.employeeId]);
+    await pool.query("UPDATE EMPLOYEE SET role_id = $1 WHERE id = $2", [answer.new_role_id, answer.employee_id]);
     console.log("Employee role updated!");
     mainMenu();
 }
