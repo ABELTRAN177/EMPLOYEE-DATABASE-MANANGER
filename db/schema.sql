@@ -1,3 +1,4 @@
+-- drop tables if they exist
 DROP TABLE IF EXISTS EMPLOYEE CASCADE;
 DROP TABLE IF EXISTS ROLE CASCADE;
 DROP TABLE IF EXISTS DEPARTMENT CASCADE;
@@ -25,12 +26,10 @@ CREATE TABLE EMPLOYEE (
     last_name VARCHAR(30) NOT NULL,
     role_id INT NOT NULL,
     manager_id INT
-    -- FOREIGN KEY (role_id) REFERENCES ROLE(id)
-    -- ON DELETE CASCADE
-    -- FOREIGN KEY (manager_id) REFERENCES EMPLOYEE(id)
-    -- ON DELETE SET NULL
 );
 
+
+--  placed at the end to avoid foreign key constraint errors
 ALTER TABLE EMPLOYEE
 ADD FOREIGN KEY (role_id) REFERENCES ROLE(id) ON DELETE CASCADE;
 

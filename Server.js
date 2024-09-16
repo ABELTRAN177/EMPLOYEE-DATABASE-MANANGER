@@ -5,7 +5,6 @@ const { Pool } = require('pg');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -20,9 +19,7 @@ const pool = new Pool({
 });
 
 
-// client.connect();
-
-
+// sets the layout of the database
 const mainMenu = async () => {
     const answer = await inquirer.prompt([
         {
@@ -160,7 +157,8 @@ const updateEmployeeRole = async () => {
     console.log("Employee role updated!");
     mainMenu();
 }
-
+// runs the main menu
 mainMenu();
 
+// not using a port for now, added it for best practice
 app.listen(PORT, () => { console.log(`API server now on port http://localhost:${PORT}`); });
